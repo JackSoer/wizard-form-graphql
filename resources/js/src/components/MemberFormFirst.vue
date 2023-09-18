@@ -1,0 +1,126 @@
+<template>
+  <div class="memeber-form-first">
+    <my-input
+      v-for="input in inputDataFirst"
+      :label="input.label"
+      :key="input.id"
+      v-bind="input"
+      :model-value="member[input.name]"
+      @update:model-value="changeMember"
+      :errors="validator[input.name].$errors"
+      @blur="validator[input.name].$touch"
+    />
+    <birthdate-input
+      required="true"
+      @changeDate="changeMember"
+      :model-value="member.birthdate"
+      :errors="validator.birthdate.$errors"
+      @blur="validator.birthdate.$touch"
+    />
+    <my-input
+      label="Report Subject"
+      name="reportSubject"
+      id="reportSubject"
+      required="true"
+      maxlenght="100"
+      minlenght="2"
+      :model-value="member.reportSubject"
+      @update:model-value="changeMember"
+      :errors="validator.reportSubject.$errors"
+      @blur="validator.reportSubject.$touch"
+    />
+    <my-select
+      :items="countriesOptions"
+      name="country"
+      id="country"
+      required="true"
+      label="Country"
+      :model-value="member.country"
+      @update:model-value="changeMember"
+      :errors="validator.country.$errors"
+      @blur="validator.country.$touch"
+    />
+    <phone-input
+      @changePhone="changeMember"
+      :model-value="member.phone"
+      @isValid="handlePhoneError"
+      :nextClickCount="nextClickCount"
+    />
+    <my-input
+      label="Email"
+      type="email"
+      name="email"
+      id="email"
+      required="true"
+      :model-value="member.email"
+      @update:model-value="changeMember"
+      :errors="validator.email.$errors"
+      @blur="validator.email.$touch"
+      maxlenght="100"
+      minlenght="3"
+    />
+  </div>
+</template>
+<script>
+import PhoneInput from "@/components/PhoneInput.vue";
+import BirthdateInput from "@/components/BirthdateInput.vue";
+import inputData from "@/data/inputData";
+import countries from "@/data/countries";
+import { mapState, mapMutations } from "vuex";
+
+export default {
+  components: { BirthdateInput, PhoneInput },
+  data() {
+    return {};
+  },
+  setup() {
+    const inputDataFirst = inputData.firstPart.slice(0, 2);
+    const inputDataSecond = inputData.firstPart.slice(3);
+
+    const countriesOptions = countries.map((country) => ({
+      ...country,
+      value: country.name,
+    }));
+
+    return {
+      inputDataFirst,
+      inputDataSecond,
+      countriesOptions,
+    };
+  },
+  methods: {
+    ...mapMutations({
+      changeMemberField: "member/changeMemberField",
+    }),
+    changeMember(value, field) {
+      this.changeMemberField({ field, value });
+    },
+    handlePhoneError(isValid) {
+      this.$emit("validatePhone", isValid);
+    },
+  },
+  computed: {
+    ...mapState({
+      member: (state) => state.member.member,
+    }),
+  },
+  props: {
+    validator: {
+      type: Object,
+      required: true,
+    },
+    nextClickCount: {
+      type: Number,
+      required: true,
+    },
+  },
+};
+</script>
+<style lang="scss" scoped>
+.memeber-form-first {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+}
+</style>

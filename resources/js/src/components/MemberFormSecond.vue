@@ -43,6 +43,12 @@ export default {
   components: {
     FileInput,
   },
+  props: {
+    requestErrors: {
+      type: [Object, null],
+      default: null,
+    },
+  },
   setup() {
     const inputDataSecond = inputData.secondPart;
     const photoErrors = ref([]);

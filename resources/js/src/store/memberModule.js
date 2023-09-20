@@ -12,6 +12,7 @@ const memberModule = {
       position: "",
       aboutMe: "",
       photo: null,
+      isVisible: 1,
     },
   }),
   mutations: {
@@ -20,6 +21,22 @@ const memberModule = {
     },
     setMember(state, member) {
       state.member = member;
+    },
+    clearMember(state) {
+      state.member = {
+        firstName: "",
+        lastName: "",
+        birthdate: "",
+        reportSubject: "",
+        country: "",
+        phone: "",
+        email: "",
+        company: "",
+        position: "",
+        aboutMe: "",
+        photo: null,
+        isVisible: 1,
+      };
     },
     setMemberFromLocalStorage(state) {
       const memberFromLocalStorage = JSON.parse(localStorage.getItem("member"));

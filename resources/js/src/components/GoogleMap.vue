@@ -10,7 +10,7 @@
               class="info-window__img"
             />
             <h4 class="info-window__title">
-              7060 Hollywood Blvd, Los Angeles, CA
+              {{ address }}
             </h4>
           </div>
         </InfoWindow>
@@ -20,6 +20,7 @@
 </template>
 <script>
 import { GoogleMap, Marker, InfoWindow } from "vue3-google-map";
+import { address } from "@/config/map";
 
 export default {
   components: {
@@ -33,7 +34,7 @@ export default {
     const center = { lat: 34.101585, lng: -118.333626 };
     const markerOptions = {
       position: center,
-      title: "7060 Hollywood Blvd, Los Angeles, CA",
+      title: address,
       label: "LA",
     };
 
@@ -41,6 +42,7 @@ export default {
       apiKey,
       center,
       markerOptions,
+      address,
     };
   },
 };

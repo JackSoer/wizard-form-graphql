@@ -55,9 +55,12 @@
       :model-value="member.email"
       @update:model-value="changeMember"
       :errors="validator.email.$errors"
+      :requestErrors="requestErrors?.email"
       @blur="validator.email.$touch"
       maxlenght="100"
       minlenght="3"
+      :nextClickCount="nextClickCount"
+      :isLoading="isLoading"
     />
   </div>
 </template>
@@ -70,9 +73,6 @@ import { mapState, mapMutations } from "vuex";
 
 export default {
   components: { BirthdateInput, PhoneInput },
-  data() {
-    return {};
-  },
   setup() {
     const inputDataFirst = inputData.firstPart.slice(0, 2);
     const inputDataSecond = inputData.firstPart.slice(3);
@@ -112,6 +112,14 @@ export default {
     nextClickCount: {
       type: Number,
       required: true,
+    },
+    requestErrors: {
+      type: [Object, null],
+      default: null,
+    },
+    isLoading: {
+      type: Boolean,
+      default: false,
     },
   },
 };

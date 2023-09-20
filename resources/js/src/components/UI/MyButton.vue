@@ -1,11 +1,21 @@
 <template>
-  <button class="my-button">
-    <slot></slot>
+  <button class="my-button" :class="{ 'my-button--disabled': disabled }">
+    <slot v-if="!disabled"></slot>
+    <div v-if="disabled" class="loading-box"><loading /></div>
   </button>
 </template>
 <script>
+import Loading from "../Loading.vue";
+
 export default {
+  components: { Loading },
   name: "my-button",
+  props: {
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
@@ -15,7 +25,7 @@ export default {
   background-color: $mainBackground;
   color: $mainTextColor;
   font-size: 20px;
-  padding: 12px 0;
+  height: 55px;
   max-width: 100px;
   width: 100%;
   border-radius: 13px;
@@ -27,5 +37,20 @@ export default {
     background-color: $mainTextColor;
     color: white;
   }
+
+  &--disabled {
+    opacity: 0.5;
+    cursor: default;
+
+    &:hover {
+      background-color: $mainBackground;
+      color: $mainTextColor;
+    }
+  }
+}
+
+.loading-box {
+  width: 100%;
+  height: 100%;
 }
 </style>

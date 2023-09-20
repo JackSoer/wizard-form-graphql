@@ -11,12 +11,25 @@
     <p class="error" v-for="error in errors" :key="error.$uid">
       {{ error.$message }}
     </p>
+    <p
+      v-if="!changing && !isLoading"
+      class="error"
+      v-for="error in requestErrors"
+      :key="error"
+    >
+      {{ error }}
+    </p>
   </div>
 </template>
 <script>
 export default {
   name: "my-input",
   inheritAttrs: false,
+  data() {
+    return {
+      changing: false,
+    };
+  },
   props: {
     type: {
       type: String,
@@ -34,10 +47,29 @@ export default {
       type: [Array],
       default: [],
     },
+    requestErrors: {
+      type: [Array, null],
+      default: null,
+    },
+    nextClickCount: {
+      type: Number,
+      default: 0,
+    },
+    isLoading: {
+      type: Boolean,
+      default: false,
+    },
   },
   methods: {
     change(e) {
+      this.changing = true;
+
       this.$emit("update:modelValue", e.target.value, e.target.name);
+    },
+  },
+  watch: {
+    nextClickCount() {
+      this.changing = false;
     },
   },
 };

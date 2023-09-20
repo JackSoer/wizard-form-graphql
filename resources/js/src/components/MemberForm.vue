@@ -14,6 +14,8 @@
         :validator="v$"
         @validatePhone="validatePhone"
         :nextClickCount="nextClickCount"
+        :requestErrors="requestErrors"
+        :isLoading="isLoading"
       />
       <member-form-second
         v-if="currentStep === 2"
@@ -27,7 +29,11 @@
         <my-button @click="back" v-if="!isFirstStep()" type="button">
           Back
         </my-button>
-        <my-button class="member-form__next-btn" type="submit">
+        <my-button
+          class="member-form__next-btn"
+          type="submit"
+          :disabled="isLoading === true"
+        >
           {{ isLastStep() ? "Finish" : "Next" }}
         </my-button>
       </div>
@@ -45,6 +51,12 @@ import { ref, computed } from "vue";
 
 export default {
   components: { MemberFormFirst, MemberFormSecond },
+  data() {
+    return {
+      requestErrors: null,
+      isLoading: false,
+    };
+  },
   computed: {
     ...mapState({
       member: (state) => state.member.member,
@@ -118,6 +130,7 @@ export default {
   methods: {
     ...mapMutations({
       setMemberFromLocalStorage: "member/setMemberFromLocalStorage",
+      clearMember: "member/clearMember",
     }),
     async submitMember() {
       let member = this.member;
@@ -137,19 +150,88 @@ export default {
 
       const isValid = await validation.value.$validate();
 
+      this.nextClickCount += 1;
+
       if (isValid && this.phoneIsValid && this.photoErrors.length <= 0) {
+        const userId = localStorage.getItem("userId") || null;
+
+        const formData = new FormData();
+
+        for (const key in member) {
+          if (key === "photo" && !member[key]) {
+            continue;
+          }
+
+          formData.append(key, member[key]);
+        }
+
+        const BASE_URL = import.meta.env.VITE_BASE_URL;
+
+        if (userId) {
+          formData.append("_method", "PUT");
+
+          try {
+            this.isLoading = true;
+
+            await axios.post(`${BASE_URL}/api/v1/members/${userId}`, formData);
+
+            this.requestErrors = null;
+          } catch (err) {
+            console.log(err);
+
+            if (err?.response?.data?.errors) {
+              this.requestErrors = err?.response?.data?.errors;
+            } else {
+              this.requestErrors = err?.response?.data?.message;
+            }
+          } finally {
+            this.isLoading = false;
+          }
+        } else {
+          try {
+            this.isLoading = true;
+
+            const response = await axios.post(
+              `${BASE_URL}/api/v1/members`,
+              formData
+            );
+
+            localStorage.setItem("userId", response.data.data.id);
+
+            this.requestErrors = null;
+          } catch (err) {
+            console.log(err);
+
+            if (err?.response?.data?.errors) {
+              this.requestErrors = err?.response?.data?.errors;
+            } else {
+              this.requestErrors = err?.response?.data?.message;
+            }
+          } finally {
+            this.isLoading = false;
+          }
+        }
+
+        if (this.requestErrors) {
+          return;
+        }
+
         if (!this.isLastStep()) {
           localStorage.setItem("member", JSON.stringify(member));
 
           this.next();
 
           localStorage.setItem("currentStep", this.currentStep);
-        }
-      } else {
-        alert("not valid");
-      }
+        } else {
+          localStorage.removeItem("currentStep");
+          localStorage.removeItem("member");
+          localStorage.removeItem("userId");
 
-      this.nextClickCount += 1;
+          this.clearMember();
+
+          this.$router.push("/share");
+        }
+      }
     },
     validatePhone(isValid) {
       this.phoneIsValid = isValid;
@@ -161,6 +243,10 @@ export default {
   mounted() {
     this.setMemberFromLocalStorage();
     this.v$ = useVuelidate(this.rules, this.member);
+
+    if (this.currentStep === 1) {
+      localStorage.removeItem("userId");
+    }
   },
 };
 </script>

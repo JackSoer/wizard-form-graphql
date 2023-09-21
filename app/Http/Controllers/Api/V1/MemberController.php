@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Utils\UploadController;
+use App\Http\Requests\V1\DeleteMemberRequest;
 use App\Http\Requests\V1\StoreMemberRequest;
 use App\Http\Requests\V1\UpdateMemberRequest;
 use App\Http\Resources\V1\MemberCollection;
@@ -51,7 +52,7 @@ class MemberController extends Controller
 
         $requestData['photo'] = $filePath;
 
-        if ($member->photo) {
+        if ($filePath && $member->photo) {
             UploadController::deleteFile($member->photo);
         }
 
@@ -63,7 +64,7 @@ class MemberController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Member $member)
+    public function destroy(Member $member, DeleteMemberRequest $request)
     {
         $member->delete();
 

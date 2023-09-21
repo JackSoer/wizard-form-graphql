@@ -20,7 +20,7 @@ class MemberFactory extends Factory
             'first_name' => $this->faker->firstName(),
             'last_name' => $this->faker->lastName(),
             'birthdate' => $this->faker->date(),
-            'report_subject' => $this->faker->paragraph(),
+            'report_subject' => $this->faker->paragraph(1),
             'country' => $this->faker->country(),
             'phone' => $this->faker->phoneNumber(),
             'email' => $this->faker->email(),

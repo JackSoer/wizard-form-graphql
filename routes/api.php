@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\MemberController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,10 +15,8 @@ use Illuminate\Support\Facades\Route;
 |
  */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
 Route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\Api\V1'], function () {
     Route::apiResource('members', MemberController::class);
+    Route::apiResource('members', MemberController::class)->only(['destroy'])->middleware('auth:sanctum');
+    Route::post('/login', [UserController::class, 'login']);
 });

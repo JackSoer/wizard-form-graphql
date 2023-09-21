@@ -1,5 +1,9 @@
 <template>
-  <tr class="member-row">
+  <tr
+    class="member-row"
+    :class="{ 'member-row--admin': user?.user?.isAdmin }"
+    v-if="member.isVisible || user?.user?.isAdmin"
+  >
     <td class="member-row__column">
       <div class="member-row__img">
         <img
@@ -26,6 +30,41 @@
         }}</a>
       </p>
     </td>
+    <td class="member-row__column" v-if="user?.user?.isAdmin">
+      <div class="member-row__btns">
+        <button class="member-row__btn" aria-label="edit">
+          <img
+            src="../assets/images/pen.png"
+            alt="edit"
+            class="member-row__btn-icon"
+          />
+        </button>
+        <button
+          class="member-row__btn"
+          :aria-label="member.isVisible ? 'View' : 'Hide'"
+          @click="this.$emit('editVisibility', member)"
+        >
+          <img
+            :src="
+              member.isVisible ? getImgPath('view.png') : getImgPath('hide.png')
+            "
+            :alt="member.isVisible ? 'View' : 'Hide'"
+            class="member-row__btn-icon"
+          />
+        </button>
+        <button
+          class="member-row__btn"
+          aria-label="delete"
+          @click="this.$emit('remove', member.id)"
+        >
+          <img
+            src="../assets/images/delete.png"
+            alt="delete"
+            class="member-row__btn-icon"
+          />
+        </button>
+      </div>
+    </td>
   </tr>
 </template>
 <script>
@@ -42,6 +81,10 @@ export default {
       type: Object,
       required: true,
     },
+    user: {
+      type: Object,
+      default: null,
+    },
   },
   methods: {
     getImgPath(img) {
@@ -54,6 +97,10 @@ export default {
 .member-row {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
+
+  &--admin {
+    grid-template-columns: 1fr 1fr 1fr 1fr 90px;
+  }
 
   &__text {
     text-align: center;
@@ -81,6 +128,24 @@ export default {
     align-items: center;
     justify-content: center;
     height: 200px;
+  }
+
+  &__btns {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+  }
+
+  &__btn {
+    width: 40px;
+    height: 40px;
+
+    &-icon {
+      width: 100%;
+      height: 100%;
+    }
   }
 }
 </style>

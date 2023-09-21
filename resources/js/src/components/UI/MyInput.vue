@@ -7,6 +7,7 @@
       @input="change"
       v-bind="$attrs"
       :value="modelValue"
+      :ref="$attrs.name"
     />
     <p class="error" v-for="error in errors" :key="error.$uid">
       {{ error.$message }}
@@ -59,6 +60,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    autofocused: {
+      type: Boolean,
+      default: false,
+    },
   },
   methods: {
     change(e) {
@@ -72,6 +77,11 @@ export default {
       this.changing = false;
     },
   },
+  mounted() {
+    if (this.autofocused) {
+      this.$refs[this.$attrs.name].focus();
+    }
+  },
 };
 </script>
 <style lang="scss" scoped>
@@ -82,6 +92,7 @@ export default {
   flex-direction: column;
   justify-content: center;
   gap: 5px;
+  width: 100%;
 
   &__item {
     box-shadow: 0 0 5px 3px $mainBoxShadow;

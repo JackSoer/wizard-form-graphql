@@ -32,7 +32,7 @@
         <my-button
           class="member-form__next-btn"
           type="submit"
-          :disabled="isLoading === true"
+          :isLoading="isLoading === true"
         >
           {{ isLastStep() ? "Finish" : "Next" }}
         </my-button>
@@ -182,7 +182,7 @@ export default {
             if (err?.response?.data?.errors) {
               this.requestErrors = err?.response?.data?.errors;
             } else {
-              this.requestErrors = err?.response?.data?.message;
+              this.requestErrors = [err?.response?.data?.message];
             }
           } finally {
             this.isLoading = false;
@@ -205,7 +205,7 @@ export default {
             if (err?.response?.data?.errors) {
               this.requestErrors = err?.response?.data?.errors;
             } else {
-              this.requestErrors = err?.response?.data?.message;
+              this.requestErrors = [err?.response?.data?.message];
             }
           } finally {
             this.isLoading = false;
@@ -282,7 +282,7 @@ export default {
   &__steps-count {
     text-align: center;
     font-weight: 500;
-    font-size: 16px;
+    font-size: 18px;
     margin-bottom: 10px;
   }
 }

@@ -9,6 +9,7 @@
       @update:model-value="changeMember"
       :errors="validator[input.name].$errors"
       @blur="validator[input.name].$touch"
+      :autofocused="input.name === 'firstName' ? true : false"
     />
     <birthdate-input
       required="true"

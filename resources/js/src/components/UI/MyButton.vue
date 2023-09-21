@@ -1,7 +1,11 @@
 <template>
-  <button class="my-button" :class="{ 'my-button--disabled': disabled }">
-    <slot v-if="!disabled"></slot>
-    <div v-if="disabled" class="loading-box"><loading /></div>
+  <button
+    class="my-button"
+    :class="{ 'my-button--disabled': isLoading }"
+    :disabled="isLoading"
+  >
+    <slot v-if="!isLoading"></slot>
+    <div v-if="isLoading" class="loading-box"><loading /></div>
   </button>
 </template>
 <script>
@@ -11,7 +15,7 @@ export default {
   components: { Loading },
   name: "my-button",
   props: {
-    disabled: {
+    isLoading: {
       type: Boolean,
       default: false,
     },

@@ -35,6 +35,7 @@
         <button
           class="member-row__btn"
           aria-label="edit"
+          title="Edit"
           @click="$router.push(`/edit-member/${member.id}`)"
         >
           <img
@@ -47,6 +48,7 @@
           class="member-row__btn"
           :aria-label="member.isVisible ? 'View' : 'Hide'"
           @click="this.$emit('editVisibility', member)"
+          :title="member.isVisible ? 'View' : 'Hide'"
         >
           <img
             :src="
@@ -60,6 +62,7 @@
           class="member-row__btn"
           aria-label="delete"
           @click="this.$emit('remove', member.id)"
+          title="Delete"
         >
           <img
             src="../assets/images/delete.png"

@@ -178,7 +178,7 @@ export default {
         const formData = new FormData();
 
         for (const key in member) {
-          if (key === "photo" && !member[key]) {
+          if (key === "photo" && !member[key] && !this.onlyEdit) {
             continue;
           }
 
@@ -286,6 +286,9 @@ export default {
   &__item {
     max-width: 350px;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
 
   &__title {
@@ -300,7 +303,7 @@ export default {
     align-items: center;
     justify-content: space-between;
     gap: 20px;
-    margin-top: 18px;
+    margin-top: 10px;
 
     &--start {
       justify-content: flex-end;

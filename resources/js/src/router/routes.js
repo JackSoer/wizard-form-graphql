@@ -32,6 +32,9 @@ const routes = [
   {
     path: "/edit-member/:id",
     component: EditMember,
+    meta: {
+      adminRequired: true,
+    },
   },
 ];
 

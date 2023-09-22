@@ -1,11 +1,29 @@
 <template>
   <div class="file-box">
     <label :for="$attrs.id" class="file-label">{{ label }}</label>
-    <div class="hints">
-      <p class="hint">Max size: {{ maxMb }} MB</p>
-      <p class="hint">Allowed types: {{ allowedTypes.join(", ") }}</p>
+    <div class="file-box__info">
+      <div class="hints">
+        <p class="hint">Max size: {{ maxMb }} MB</p>
+        <p class="hint">Allowed types: {{ allowedTypes.join(", ") }}</p>
+      </div>
+      <div
+        class="edited-avatar"
+        v-if="typeof modelValue === 'string' && !changing"
+      >
+        <img
+          :src="BASE_URL + modelValue"
+          alt="Edited avatar"
+          class="edited-avatar__item"
+        />
+      </div>
     </div>
-    <input type="file" class="file-input" v-bind="$attrs" @input="changeFile" />
+    <input
+      type="file"
+      class="file-input"
+      v-bind="$attrs"
+      @input="changeFile"
+      @mouseup="changeFile"
+    />
     <p
       class="error"
       v-for="validationError in validationErrors"
@@ -65,6 +83,7 @@ export default {
   },
   methods: {
     changeFile(e) {
+      this.changing = true;
       this.$emit("update:modelValue", e.target.files[0], e.target.name);
     },
   },
@@ -72,6 +91,18 @@ export default {
     validationErrors() {
       this.$emit("errors", this.validationErrors);
     },
+  },
+  setup() {
+    const BASE_URL = import.meta.env.VITE_BASE_URL;
+
+    return {
+      BASE_URL,
+    };
+  },
+  data() {
+    return {
+      changing: false,
+    };
   },
 };
 </script>
@@ -83,6 +114,12 @@ export default {
   flex-direction: column;
   justify-content: center;
   gap: 5px;
+
+  &__info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
 }
 
 .file-input {
@@ -108,5 +145,15 @@ export default {
 .hint {
   font-size: 11px;
   color: gray;
+}
+
+.edited-avatar {
+  width: 30px;
+  height: 30px;
+
+  &__item {
+    height: 100%;
+    width: 100%;
+  }
 }
 </style>

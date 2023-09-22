@@ -5,6 +5,7 @@
       :type="type"
       class="my-input__item"
       @input="change"
+      @keydown="preventLeadingSpaces"
       v-bind="$attrs"
       :value="modelValue"
       :ref="$attrs.name"
@@ -70,6 +71,11 @@ export default {
       this.changing = true;
 
       this.$emit("update:modelValue", e.target.value, e.target.name);
+    },
+    preventLeadingSpaces(e) {
+      if (e.key === " " && e.target.selectionStart === 0) {
+        e.preventDefault();
+      }
     },
   },
   watch: {

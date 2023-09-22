@@ -54,12 +54,14 @@ class MemberController extends Controller
             $requestData['photo'] = $filePath;
         }
 
-        if ($filePath && $member->photo) {
-            UploadController::deleteFile($member->photo);
+        $oldPhoto = $member->photo;
+        $photoIsNull = key_exists('photo', $requestData) && is_null($requestData['photo']);
+
+        if ($filePath && $oldPhoto || $photoIsNull && $oldPhoto) {
+            UploadController::deleteFile($oldPhoto);
         }
 
         $member->update($requestData);
-        var_dump($member);
 
         return new MemberResource($member);
     }
@@ -70,6 +72,12 @@ class MemberController extends Controller
     public function destroy(Member $member, DeleteMemberRequest $request)
     {
         $member->delete();
+
+        $oldPhoto = $member->photo;
+
+        if ($oldPhoto) {
+            UploadController::deleteFile($oldPhoto);
+        }
 
         return new MemberResource($member);
     }

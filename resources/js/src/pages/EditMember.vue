@@ -6,6 +6,10 @@
       v-if="!isLoading && !errors && member !== null"
       :editId="id"
     />
+    <loading v-if="!errors && isLoading"></loading>
+    <div class="errors" v-if="!isLoading && errors">
+      <p class="error" v-for="error in errors">{{ error }}</p>
+    </div>
   </div>
 </template>
 <script>
@@ -14,10 +18,12 @@ import { mapMutations, useStore } from "vuex";
 import useAxiosFetch from "@/hooks/useAxiosFetch";
 import { useRoute } from "vue-router";
 import { watch } from "vue";
+import Loading from "@/components/Loading.vue";
 
 export default {
   components: {
     MemberForm,
+    Loading,
   },
   setup() {
     const route = useRoute();
@@ -55,4 +61,22 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.edit-member {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.errors {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+}
+
+.error {
+  font-size: 16px;
+  font-weight: 500;
+}
+</style>

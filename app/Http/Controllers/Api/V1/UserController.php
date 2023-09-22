@@ -6,13 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\LoginRequest;
 use App\Http\Resources\V1\UserResource;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
     public function login(LoginRequest $request)
     {
-        $user = User::where('login', $request->login)->first();
+        $user = User::where(DB::raw('BINARY `login`'), $request->login)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response([

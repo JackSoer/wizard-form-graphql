@@ -23,10 +23,10 @@ class StoreMemberRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'firstName' => ['required', 'between: 2, 30', 'string'],
-            'lastName' => ['required', 'between: 2, 30', 'string'],
+            'firstName' => ['required', 'between: 1, 30', 'string'],
+            'lastName' => ['required', 'between: 1, 30', 'string'],
             'birthdate' => ['required', 'date_format:Y-m-d', 'before:tomorrow', 'date'],
-            'reportSubject' => ['required', 'between: 2, 100', "string"],
+            'reportSubject' => ['required', 'between: 1, 100', "string"],
             'country' => ['required', 'string', 'between: 2, 100'],
             'phone' => ['required', 'string', 'between: 10, 100'],
             'email' => ['required', Rule::unique('members'), 'email:rfc, dns'],

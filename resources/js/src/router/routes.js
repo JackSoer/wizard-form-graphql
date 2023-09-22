@@ -2,6 +2,8 @@ import Main from "@/pages/Main.vue";
 import Login from "@/pages/Login.vue";
 import AllMembers from "@/pages/AllMembers.vue";
 import Share from "@/pages/Share.vue";
+import AdminTable from "@/pages/AdminTable.vue";
+import EditMember from "@/pages/EditMember.vue";
 
 const routes = [
   {
@@ -19,6 +21,17 @@ const routes = [
   {
     path: "/all-members",
     component: AllMembers,
+  },
+  {
+    path: "/admin-table",
+    component: AdminTable,
+    meta: {
+      adminRequired: true,
+    },
+  },
+  {
+    path: "/edit-member/:id",
+    component: EditMember,
   },
 ];
 

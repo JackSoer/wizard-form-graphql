@@ -9,7 +9,7 @@
       @update:model-value="changeMember"
       :errors="validator[input.name].$errors"
       @blur="validator[input.name].$touch"
-      :autofocused="input.name === 'company' ? true : false"
+      :autofocused="input.name === 'company' && !onlyEdit ? true : false"
     />
     <my-textarea
       label="About Me"
@@ -49,6 +49,14 @@ export default {
       type: [Object, null],
       default: null,
     },
+    onlyEdit: {
+      type: Boolean,
+      default: false,
+    },
+    validator: {
+      type: Object,
+      required: true,
+    },
   },
   setup() {
     const inputDataSecond = inputData.secondPart;
@@ -74,12 +82,6 @@ export default {
     ...mapState({
       member: (state) => state.member.member,
     }),
-  },
-  props: {
-    validator: {
-      type: Object,
-      required: true,
-    },
   },
   watch: {
     photoErrors() {

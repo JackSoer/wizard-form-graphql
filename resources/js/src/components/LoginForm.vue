@@ -57,7 +57,7 @@ export default {
       await this.loginAction(creds);
 
       if (!this.errors) {
-        this.$router.push("/all-members");
+        this.$router.push("/admin-table");
       }
     },
   },

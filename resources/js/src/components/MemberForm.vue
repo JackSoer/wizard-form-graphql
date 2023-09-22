@@ -1,16 +1,18 @@
 <template>
   <div class="member-form">
     <h1 class="member-form__title">
-      To participate in the conference, please fill out the form
+      {{ title }}
     </h1>
-    <p class="member-form__steps-count">{{ currentStep }} / 2</p>
+    <p class="member-form__steps-count" v-if="!onlyEdit">
+      {{ currentStep }} / 2
+    </p>
     <form
       class="member-form__item"
       enctype="multipart/form-data"
       @submit.prevent="submitMember"
     >
       <member-form-first
-        v-if="currentStep === 1"
+        v-if="currentStep === 1 || onlyEdit"
         :validator="v$"
         @validatePhone="validatePhone"
         :nextClickCount="nextClickCount"
@@ -18,15 +20,20 @@
         :isLoading="isLoading"
       />
       <member-form-second
-        v-if="currentStep === 2"
+        v-if="currentStep === 2 || onlyEdit"
         :validator="v$"
         @photoErrors="validatePhoto"
+        :onlyEdit="onlyEdit"
       />
       <div
         class="member-form__btns"
         :class="{ 'member-form__btns--start': isFirstStep() }"
       >
-        <my-button @click="back" v-if="!isFirstStep()" type="button">
+        <my-button
+          @click="back"
+          v-if="!isFirstStep() && !onlyEdit"
+          type="button"
+        >
           Back
         </my-button>
         <my-button
@@ -34,7 +41,7 @@
           type="submit"
           :isLoading="isLoading === true"
         >
-          {{ isLastStep() ? "Finish" : "Next" }}
+          {{ onlyEdit ? "Edit" : isLastStep() ? "Finish" : "Next" }}
         </my-button>
       </div>
     </form>
@@ -51,6 +58,19 @@ import { ref, computed } from "vue";
 
 export default {
   components: { MemberFormFirst, MemberFormSecond },
+  props: {
+    onlyEdit: {
+      type: Boolean,
+      default: false,
+    },
+    title: {
+      type: String,
+      default: "To participate in the conference, please fill out the form",
+    },
+    editId: {
+      type: String,
+    },
+  },
   data() {
     return {
       requestErrors: null,
@@ -135,7 +155,7 @@ export default {
     async submitMember() {
       let member = this.member;
 
-      if (this.isFirstStep()) {
+      if (this.isFirstStep() && !this.onlyEdit) {
         member = {
           ...member,
           company: "",
@@ -162,18 +182,22 @@ export default {
             continue;
           }
 
-          formData.append(key, member[key]);
+          if (!member[key]) {
+            formData.append(key, "");
+          } else {
+            formData.append(key, member[key]);
+          }
         }
-
         const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-        if (userId) {
+        if (userId || this.onlyEdit) {
           formData.append("_method", "PUT");
+          const id = this.onlyEdit ? this.editId : userId;
 
           try {
             this.isLoading = true;
 
-            await axios.post(`${BASE_URL}/api/v1/members/${userId}`, formData);
+            await axios.post(`${BASE_URL}/api/v1/members/${id}`, formData);
 
             this.requestErrors = null;
           } catch (err) {
@@ -216,13 +240,13 @@ export default {
           return;
         }
 
-        if (!this.isLastStep()) {
+        if (!this.isLastStep() && !this.onlyEdit) {
           localStorage.setItem("member", JSON.stringify(member));
 
           this.next();
 
           localStorage.setItem("currentStep", this.currentStep);
-        } else {
+        } else if (!this.onlyEdit) {
           localStorage.removeItem("currentStep");
           localStorage.removeItem("member");
           localStorage.removeItem("userId");
@@ -230,6 +254,8 @@ export default {
           this.clearMember();
 
           this.$router.push("/share");
+        } else {
+          this.$router.push("/admin-table");
         }
       }
     },
@@ -241,11 +267,13 @@ export default {
     },
   },
   mounted() {
-    this.setMemberFromLocalStorage();
-    this.v$ = useVuelidate(this.rules, this.member);
+    if (!this.onlyEdit) {
+      this.setMemberFromLocalStorage();
+      this.v$ = useVuelidate(this.rules, this.member);
 
-    if (this.currentStep === 1) {
-      localStorage.removeItem("userId");
+      if (this.currentStep === 1) {
+        localStorage.removeItem("userId");
+      }
     }
   },
 };

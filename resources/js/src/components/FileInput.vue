@@ -24,7 +24,7 @@ export default {
       default: "",
     },
     modelValue: {
-      type: [File, null],
+      type: [File, null, String],
       default: null,
     },
     maxMb: {

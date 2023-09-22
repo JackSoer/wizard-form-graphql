@@ -1,8 +1,8 @@
 <template>
   <tr
     class="member-row"
-    :class="{ 'member-row--admin': user?.user?.isAdmin }"
-    v-if="member.isVisible || user?.user?.isAdmin"
+    :class="{ 'member-row--admin': $route.path === '/admin-table' }"
+    v-if="member.isVisible || $route.path === '/admin-table'"
   >
     <td class="member-row__column">
       <div class="member-row__img">
@@ -30,9 +30,13 @@
         }}</a>
       </p>
     </td>
-    <td class="member-row__column" v-if="user?.user?.isAdmin">
+    <td class="member-row__column" v-if="$route.path === '/admin-table'">
       <div class="member-row__btns">
-        <button class="member-row__btn" aria-label="edit">
+        <button
+          class="member-row__btn"
+          aria-label="edit"
+          @click="$router.push(`/edit-member/${member.id}`)"
+        >
           <img
             src="../assets/images/pen.png"
             alt="edit"
@@ -80,10 +84,6 @@ export default {
     member: {
       type: Object,
       required: true,
-    },
-    user: {
-      type: Object,
-      default: null,
     },
   },
   methods: {

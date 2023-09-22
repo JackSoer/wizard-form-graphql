@@ -50,13 +50,16 @@ class MemberController extends Controller
 
         $requestData = $request->all();
 
-        $requestData['photo'] = $filePath;
+        if ($filePath) {
+            $requestData['photo'] = $filePath;
+        }
 
         if ($filePath && $member->photo) {
             UploadController::deleteFile($member->photo);
         }
 
         $member->update($requestData);
+        var_dump($member);
 
         return new MemberResource($member);
     }

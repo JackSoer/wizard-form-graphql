@@ -10,7 +10,7 @@ import MemberForm from "@/components/MemberForm.vue";
 import GoogleMap from "@/components/GoogleMap.vue";
 
 export default {
-  components: { GoogleMap, MemberForm, MemberForm },
+  components: { GoogleMap, MemberForm },
 };
 </script>
 

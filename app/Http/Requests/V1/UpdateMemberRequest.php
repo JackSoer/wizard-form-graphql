@@ -27,17 +27,17 @@ class UpdateMemberRequest extends FormRequest
 
         if ($method === 'PUT') {
             return [
-                'firstName' => ['required', 'between: 2, 30', 'string'],
-                'lastName' => ['required', 'between: 2, 30', 'string'],
+                'firstName' => ['required', 'between: 1, 30', 'string'],
+                'lastName' => ['required', 'between: 1, 30', 'string'],
                 'birthdate' => ['required', 'date_format:Y-m-d', 'before:tomorrow', 'date'],
-                'reportSubject' => ['required', 'between: 2, 100', "string"],
+                'reportSubject' => ['required', 'between: 1, 100', "string"],
                 'country' => ['required', 'string', 'between: 2, 100'],
                 'phone' => ['required', 'string', 'between: 10, 100'],
                 'email' => ['required', Rule::unique('members')->ignore($memberId, 'id'), 'email:rfc, dns'],
                 'company' => ['nullable', 'string', 'max:40'],
                 'position' => ['nullable', 'string', 'max:40'],
                 'aboutMe' => ['nullable', 'string', 'max:2000'],
-                'photo' => ['nullable', 'file', 'max:5242880', 'image'],
+                'photo' => ['nullable'],
                 'isVisible' => ['nullable', 'boolean'],
             ];
         } else {
@@ -69,7 +69,7 @@ class UpdateMemberRequest extends FormRequest
         if (isset($this->lastName)) {
             $mergedArray['last_name'] = $this->lastName;
         }
-        if (isset($this->aboutMe)) {
+        if (isset($this->aboutMe) || $this->method() === 'PUT') {
             $mergedArray['about_me'] = $this->aboutMe;
         }
         if (isset($this->reportSubject)) {

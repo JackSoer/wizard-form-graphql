@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\CountryController;
 use App\Http\Controllers\Api\V1\MemberController;
 use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Support\Facades\Route;
@@ -18,5 +19,6 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\Api\V1'], function () {
     Route::apiResource('members', MemberController::class);
     Route::apiResource('members', MemberController::class)->only(['destroy'])->middleware('auth:sanctum');
+    Route::apiResource('country', CountryController::class);
     Route::post('/login', [UserController::class, 'login']);
 });

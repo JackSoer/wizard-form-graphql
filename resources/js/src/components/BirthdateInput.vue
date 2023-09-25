@@ -1,5 +1,5 @@
 <template>
-  <my-input
+  <MyInput
     :label="label"
     v-bind="inputData"
     :max="maxDate"

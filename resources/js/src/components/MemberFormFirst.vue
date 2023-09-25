@@ -1,6 +1,6 @@
 <template>
   <div class="memeber-form-first">
-    <my-input
+    <MyInput
       v-for="input in inputDataFirst"
       :label="input.label"
       :key="input.id"
@@ -11,14 +11,14 @@
       @blur="validator[input.name].$touch"
       :autofocused="input.name === 'firstName' ? true : false"
     />
-    <birthdate-input
+    <BirthdateInput
       required="true"
       @changeDate="changeMember"
       :model-value="member.birthdate"
       :errors="validator.birthdate.$errors"
       @blur="validator.birthdate.$touch"
     />
-    <my-input
+    <MyInput
       label="Report Subject"
       name="reportSubject"
       id="reportSubject"
@@ -30,7 +30,7 @@
       :errors="validator.reportSubject.$errors"
       @blur="validator.reportSubject.$touch"
     />
-    <my-select
+    <MySelect
       :items="countriesOptions"
       name="country"
       id="country"
@@ -41,13 +41,13 @@
       :errors="validator.country.$errors"
       @blur="validator.country.$touch"
     />
-    <phone-input
+    <PhoneInput
       @changePhone="changeMember"
       :model-value="member.phone"
       @isValid="handlePhoneError"
       :nextClickCount="nextClickCount"
     />
-    <my-input
+    <MyInput
       label="Email"
       type="email"
       name="email"
@@ -69,8 +69,9 @@
 import PhoneInput from "@/components/PhoneInput.vue";
 import BirthdateInput from "@/components/BirthdateInput.vue";
 import inputData from "@/data/inputData";
-import countries from "@/data/countries";
+import useAxiosFetch from "@/hooks/useAxiosFetch";
 import { mapState, mapMutations } from "vuex";
+import { computed } from "vue";
 
 export default {
   components: { BirthdateInput, PhoneInput },
@@ -78,10 +79,16 @@ export default {
     const inputDataFirst = inputData.firstPart.slice(0, 2);
     const inputDataSecond = inputData.firstPart.slice(3);
 
-    const countriesOptions = countries.map((country) => ({
-      ...country,
-      value: country.name,
-    }));
+    const { responseData: countries } = useAxiosFetch(
+      "http://127.0.0.1:8000/api/v1/country"
+    );
+
+    const countriesOptions = computed(() => {
+      return countries.value?.data?.map((country) => ({
+        ...country,
+        value: country.name,
+      }));
+    });
 
     return {
       inputDataFirst,

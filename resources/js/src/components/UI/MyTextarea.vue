@@ -14,7 +14,7 @@
 </template>
 <script>
 export default {
-  name: "my-textarea",
+  name: "MyTextarea",
   inheritAttrs: false,
   props: {
     label: {

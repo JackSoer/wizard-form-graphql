@@ -1,7 +1,7 @@
 <template>
   <form class="login" @submit.prevent="submit">
     <h1 class="login__title">Login</h1>
-    <my-input
+    <MyInput
       label="Login"
       id="login"
       name="login"
@@ -9,7 +9,7 @@
       :autofocused="true"
       required="true"
     />
-    <my-input
+    <MyInput
       label="Password"
       id="password"
       name="password"
@@ -17,7 +17,7 @@
       v-model="password"
       required="true"
     />
-    <my-button class="login__submit" :isLoading="isLoading">Send</my-button>
+    <MyButton class="login__submit" :isLoading="isLoading">Send</MyButton>
     <div class="errors" v-if="errors && !isLoading">
       <p class="error" v-for="error in errors">{{ error }}</p>
     </div>

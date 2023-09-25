@@ -11,7 +11,7 @@
       enctype="multipart/form-data"
       @submit.prevent="submitMember"
     >
-      <member-form-first
+      <MemberFormFirst
         v-if="currentStep === 1 || onlyEdit"
         :validator="v$"
         @validatePhone="validatePhone"
@@ -19,7 +19,7 @@
         :requestErrors="requestErrors"
         :isLoading="isLoading"
       />
-      <member-form-second
+      <MemberFormSecond
         v-if="currentStep === 2 || onlyEdit"
         :validator="v$"
         @photoErrors="validatePhoto"
@@ -29,20 +29,20 @@
         class="member-form__btns"
         :class="{ 'member-form__btns--start': isFirstStep() }"
       >
-        <my-button
+        <MyButton
           @click="back"
           v-if="!isFirstStep() && !onlyEdit"
           type="button"
         >
           Back
-        </my-button>
-        <my-button
+        </MyButton>
+        <MyButton
           class="member-form__next-btn"
           type="submit"
           :isLoading="isLoading === true"
         >
           {{ onlyEdit ? "Edit" : isLastStep() ? "Finish" : "Next" }}
-        </my-button>
+        </MyButton>
       </div>
     </form>
   </div>

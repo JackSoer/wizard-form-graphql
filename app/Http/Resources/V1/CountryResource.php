@@ -6,7 +6,7 @@ use App\Utils\FieldFormatter;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class UserResource extends JsonResource
+class CountryResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -15,7 +15,7 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $fields = ['id', 'login', 'is_admin'];
+        $fields = ['id', 'name', 'code'];
 
         return FieldFormatter::formatFieldsToCamelCase($this, $fields);
     }

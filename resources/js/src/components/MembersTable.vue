@@ -15,13 +15,13 @@
       </th>
     </thead>
     <tbody class="member-table__body">
-      <member-row
+      <MemberRow
         v-for="member in members.slice().reverse()"
         :member="member"
         :key="member.id"
         @remove="remove"
         @editVisibility="editVisibility"
-      ></member-row>
+      />
     </tbody>
   </table>
 </template>

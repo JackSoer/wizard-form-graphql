@@ -1,7 +1,7 @@
 <template>
   <div class="phone-box">
     <label for="phone" class="phone-label">Phone</label>
-    <vue-tel-input
+    <VueTelInput
       v-model="phone"
       @on-input="changePhone"
       v-bind="phoneOptions"
@@ -9,7 +9,7 @@
       :model-value="modelValue"
       @validate="validate"
       @blur="onBlur"
-    ></vue-tel-input>
+    />
     <p class="error" v-if="!isValid && focused">Incorrect phone</p>
   </div>
 </template>

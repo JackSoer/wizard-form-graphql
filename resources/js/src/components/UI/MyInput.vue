@@ -25,7 +25,7 @@
 </template>
 <script>
 export default {
-  name: "my-input",
+  name: "MyInput",
   inheritAttrs: false,
   data() {
     return {

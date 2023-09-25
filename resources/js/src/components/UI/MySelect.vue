@@ -25,10 +25,9 @@
 <script>
 export default {
   inheritAttrs: false,
-  name: "my-select",
+  name: "MySelect",
   props: {
     items: {
-      type: Array,
       required: true,
     },
     label: {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\V1;
 
+use App\Utils\FieldFormatter;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -14,20 +15,8 @@ class MemberResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
-            'id' => $this->id,
-            'firstName' => $this->first_name,
-            'lastName' => $this->last_name,
-            'birthdate' => $this->birthdate,
-            'reportSubject' => $this->report_subject,
-            'country' => $this->country,
-            'phone' => $this->phone,
-            'email' => $this->email,
-            'company' => $this->company,
-            'position' => $this->position,
-            'aboutMe' => $this->about_me,
-            'photo' => $this->photo,
-            'isVisible' => $this->is_visible,
-        ];
+        $fields = ['id', 'first_name', 'last_name', 'birthdate', 'report_subject', 'country', 'phone', 'email', 'company', 'position', 'about_me', 'photo', 'is_visible'];
+
+        return FieldFormatter::formatFieldsToCamelCase($this, $fields);
     }
 }

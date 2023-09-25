@@ -1,6 +1,6 @@
 <template>
   <div class="memeber-form-second">
-    <my-input
+    <MyInput
       v-for="input in inputDataSecond"
       :label="input.label"
       :key="input.id"
@@ -11,7 +11,7 @@
       @blur="validator[input.name].$touch"
       :autofocused="input.name === 'company' && !onlyEdit ? true : false"
     />
-    <my-textarea
+    <MyTextarea
       label="About Me"
       id="aboutMe"
       name="aboutMe"
@@ -21,7 +21,7 @@
       :errors="validator.aboutMe.$errors"
       @blur="validator.aboutMe.$touch"
     />
-    <file-input
+    <FileInput
       label="Photo"
       id="photo"
       name="photo"

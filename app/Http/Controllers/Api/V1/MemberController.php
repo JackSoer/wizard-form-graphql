@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\Utils\UploadController;
 use App\Http\Requests\V1\DeleteMemberRequest;
 use App\Http\Requests\V1\StoreMemberRequest;
 use App\Http\Requests\V1\UpdateMemberRequest;
 use App\Http\Resources\V1\MemberCollection;
 use App\Http\Resources\V1\MemberResource;
 use App\Models\Member;
+use App\Utils\UploadController;
 
 class MemberController extends Controller
 {

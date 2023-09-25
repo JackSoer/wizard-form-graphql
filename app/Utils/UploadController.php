@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\Utils;
+namespace App\Utils;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 

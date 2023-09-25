@@ -5,7 +5,7 @@
     :disabled="isLoading"
   >
     <slot v-if="!isLoading"></slot>
-    <div v-if="isLoading" class="loading-box"><loading /></div>
+    <div v-if="isLoading" class="loading-box"><Loading /></div>
   </button>
 </template>
 <script>
@@ -13,7 +13,7 @@ import Loading from "../Loading.vue";
 
 export default {
   components: { Loading },
-  name: "my-button",
+  name: "MyButton",
   props: {
     isLoading: {
       type: Boolean,

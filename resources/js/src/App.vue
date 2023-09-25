@@ -1,6 +1,6 @@
 <template>
   <main class="app">
-    <main-header v-if="isAdmin"></main-header>
+    <MainHeader v-if="isAdmin" />
     <router-view></router-view>
   </main>
 </template>
@@ -23,6 +23,4 @@ export default {
   },
 };
 </script>
-<style lang="scss">
-
-</style>
+<style lang="scss"></style>

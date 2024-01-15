@@ -16,8 +16,6 @@
         :validator="v$"
         @validatePhone="validatePhone"
         :nextClickCount="nextClickCount"
-        :requestErrors="requestErrors"
-        :isLoading="isLoading"
       />
       <MemberFormSecond
         v-if="currentStep === 2 || onlyEdit"
@@ -36,11 +34,7 @@
         >
           Back
         </MyButton>
-        <MyButton
-          class="member-form__next-btn"
-          type="submit"
-          :isLoading="isLoading === true"
-        >
+        <MyButton class="member-form__next-btn" type="submit">
           {{ onlyEdit ? "Edit" : isLastStep() ? "Finish" : "Next" }}
         </MyButton>
       </div>
@@ -54,7 +48,10 @@ import useMultiform from "@/hooks/useMultiform";
 import { mapState, mapMutations, useStore } from "vuex";
 import useVuelidate from "@vuelidate/core";
 import { required, maxLength, minLength, email } from "@vuelidate/validators";
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import gql from "graphql-tag";
+import { useMutation } from "@vue/apollo-composable";
 
 export default {
   components: { MemberFormFirst, MemberFormSecond },
@@ -71,20 +68,16 @@ export default {
       type: String,
     },
   },
-  data() {
-    return {
-      requestErrors: null,
-      isLoading: false,
-    };
-  },
   computed: {
     ...mapState({
       member: (state) => state.member.member,
     }),
   },
-  setup() {
+  setup({ onlyEdit, editId }) {
     const { currentStep, prev, next, isLastStep, isFirstStep } =
       useMultiform(2);
+
+    const router = useRouter();
 
     let rules = {
       firstName: {
@@ -118,6 +111,17 @@ export default {
 
     let v$ = useVuelidate(rules, member.value);
 
+    onMounted(() => {
+      if (!onlyEdit) {
+        store.commit("member/setMemberFromLocalStorage");
+        v$ = useVuelidate(rules, member);
+
+        if (currentStep === 1) {
+          localStorage.removeItem("userId");
+        }
+      }
+    });
+
     const clearLocalStorage = () => {
       localStorage.removeItem("member");
       localStorage.removeItem("currentStep");
@@ -133,6 +137,97 @@ export default {
     const photoErrors = ref([]);
     const nextClickCount = ref(0);
 
+    const CREATE_MEMBER_MUTATION = gql`
+      mutation CreateMember($input: MemberInput!) {
+        createMember(input: $input) {
+          id
+        }
+      }
+    `;
+
+    const { mutate: createMemberMutation } = useMutation(
+      CREATE_MEMBER_MUTATION
+    );
+
+    const submitMember = async () => {
+      let member = store.state.member.member;
+
+      if (isFirstStep() && !onlyEdit) {
+        member = {
+          ...member,
+          company: "",
+          position: "",
+          aboutMe: "",
+          photo: null,
+        };
+        photoErrors.value = [];
+      }
+
+      const validation = useVuelidate(rules, member);
+
+      const isValid = await validation.value.$validate();
+
+      nextClickCount.value += 1;
+
+      if (isValid && phoneIsValid.value && photoErrors.value.length <= 0) {
+        const userId = localStorage.getItem("userId") || null;
+
+        const formData = new FormData();
+
+        for (const key in member) {
+          if (key === "photo" && !member[key] && !onlyEdit) {
+            continue;
+          }
+
+          if (!member[key]) {
+            formData.append(key, "");
+          } else {
+            formData.append(key, member[key]);
+          }
+        }
+        const BASE_URL = import.meta.env.VITE_BASE_URL;
+
+        if (userId || onlyEdit) {
+          formData.append("_method", "PUT");
+          const id = onlyEdit ? editId : userId;
+
+          try {
+            await axios.post(`${BASE_URL}/api/v1/members/${id}`, formData);
+          } catch (err) {
+            console.log(err);
+          }
+        } else {
+          try {
+            const { data } = await createMemberMutation({
+              input: { ...member, isVisible: Boolean(member.isVisible) },
+            });
+
+            localStorage.setItem("userId", data.id);
+          } catch (err) {
+            console.log(err);
+          }
+        }
+
+        if (!isLastStep() && !onlyEdit) {
+          localStorage.setItem("member", JSON.stringify(member));
+
+          next();
+
+          localStorage.setItem("currentStep", currentStep.value);
+        } else if (!onlyEdit) {
+          localStorage.removeItem("currentStep");
+          localStorage.removeItem("member");
+          localStorage.removeItem("userId");
+
+          store.commit("member/clearMember");
+
+          router.push("/share");
+        } else {
+          router.push("/admin-table");
+        }
+      }
+    };
+
     return {
       currentStep,
       next,
@@ -145,6 +240,7 @@ export default {
       back,
       nextClickCount,
       member,
+      submitMember,
     };
   },
   methods: {
@@ -152,129 +248,12 @@ export default {
       setMemberFromLocalStorage: "member/setMemberFromLocalStorage",
       clearMember: "member/clearMember",
     }),
-    async submitMember() {
-      let member = this.member;
-
-      if (this.isFirstStep() && !this.onlyEdit) {
-        member = {
-          ...member,
-          company: "",
-          position: "",
-          aboutMe: "",
-          photo: null,
-        };
-        this.photoErrors = [];
-      }
-
-      const validation = useVuelidate(this.rules, member);
-
-      const isValid = await validation.value.$validate();
-
-      this.nextClickCount += 1;
-
-      if (isValid && this.phoneIsValid && this.photoErrors.length <= 0) {
-        const userId = localStorage.getItem("userId") || null;
-
-        const formData = new FormData();
-
-        for (const key in member) {
-          if (key === "photo" && !member[key] && !this.onlyEdit) {
-            continue;
-          }
-
-          if (!member[key]) {
-            formData.append(key, "");
-          } else {
-            formData.append(key, member[key]);
-          }
-        }
-        const BASE_URL = import.meta.env.VITE_BASE_URL;
-
-        if (userId || this.onlyEdit) {
-          formData.append("_method", "PUT");
-          const id = this.onlyEdit ? this.editId : userId;
-
-          try {
-            this.isLoading = true;
-
-            await axios.post(`${BASE_URL}/api/v1/members/${id}`, formData);
-
-            this.requestErrors = null;
-          } catch (err) {
-            console.log(err);
-
-            if (err?.response?.data?.errors) {
-              this.requestErrors = err?.response?.data?.errors;
-            } else {
-              this.requestErrors = [err?.response?.data?.message];
-            }
-          } finally {
-            this.isLoading = false;
-          }
-        } else {
-          try {
-            this.isLoading = true;
-
-            const response = await axios.post(
-              `${BASE_URL}/api/v1/members`,
-              formData
-            );
-
-            localStorage.setItem("userId", response.data.data.id);
-
-            this.requestErrors = null;
-          } catch (err) {
-            console.log(err);
-
-            if (err?.response?.data?.errors) {
-              this.requestErrors = err?.response?.data?.errors;
-            } else {
-              this.requestErrors = [err?.response?.data?.message];
-            }
-          } finally {
-            this.isLoading = false;
-          }
-        }
-
-        if (this.requestErrors) {
-          return;
-        }
-
-        if (!this.isLastStep() && !this.onlyEdit) {
-          localStorage.setItem("member", JSON.stringify(member));
-
-          this.next();
-
-          localStorage.setItem("currentStep", this.currentStep);
-        } else if (!this.onlyEdit) {
-          localStorage.removeItem("currentStep");
-          localStorage.removeItem("member");
-          localStorage.removeItem("userId");
-
-          this.clearMember();
-
-          this.$router.push("/share");
-        } else {
-          this.$router.push("/admin-table");
-        }
-      }
-    },
     validatePhone(isValid) {
       this.phoneIsValid = isValid;
     },
     validatePhoto(errors) {
       this.photoErrors = errors;
     },
-  },
-  mounted() {
-    if (!this.onlyEdit) {
-      this.setMemberFromLocalStorage();
-      this.v$ = useVuelidate(this.rules, this.member);
-
-      if (this.currentStep === 1) {
-        localStorage.removeItem("userId");
-      }
-    }
   },
 };
 </script>

@@ -3,22 +3,19 @@
     <member-form
       :title="'Edit member'"
       :onlyEdit="true"
-      v-if="!isLoading && !errors && member !== null"
+      v-if="member !== null"
       :editId="id"
     />
-    <loading v-if="!errors && isLoading"></loading>
-    <div class="errors" v-if="!isLoading && errors">
-      <p class="error" v-for="error in errors">{{ error }}</p>
-    </div>
   </div>
 </template>
 <script>
 import MemberForm from "@/components/MemberForm.vue";
 import { mapMutations, useStore } from "vuex";
-import useAxiosFetch from "@/hooks/useAxiosFetch";
 import { useRoute } from "vue-router";
 import { watch } from "vue";
 import Loading from "@/components/Loading.vue";
+import gql from "graphql-tag";
+import { useQuery } from "@vue/apollo-composable";
 
 export default {
   components: {
@@ -29,25 +26,43 @@ export default {
     const route = useRoute();
     const store = useStore();
     const id = route.params.id;
-    const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-    const {
-      responseData: member,
-      errors,
-      isLoading,
-    } = useAxiosFetch(`${BASE_URL}/api/v1/members/${id}`);
+    const membersQuery = gql`
+      query getMember($id: ID!) {
+        member(id: $id) {
+          id
+          firstName: first_name
+          lastName: last_name
+          birthdate
+          reportSubject: report_subject
+          country
+          phone
+          email
+          company
+          position
+          aboutMe: about_me
+          photo
+          isVisible: is_visible
+          createdAt: created_at
+          updatedAt: updated_at
+        }
+      }
+    `;
+
+    const { result: member, error } = useQuery(membersQuery, {
+      id,
+    });
 
     watch(member, (loadedMember) => {
       if (loadedMember !== null) {
-        store.commit("member/setMember", loadedMember.data);
+        store.commit("member/setMember", loadedMember.member);
       }
     });
 
     return {
       member,
-      errors,
-      isLoading,
       id,
+      error,
     };
   },
   methods: {

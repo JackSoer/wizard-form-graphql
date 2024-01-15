@@ -16,7 +16,7 @@
     <div class="share__all-members">
       <router-link to="/all-members"
         >All members ({{
-          members?.data.length ? members?.data.length : "0"
+          members?.members.length ? members?.members.length : "0"
         }})</router-link
       >
     </div>
@@ -24,13 +24,34 @@
 </template>
 <script>
 import shareData from "@/data/shareData";
-import useAxiosFetch from "@/hooks/useAxiosFetch";
+import gql from "graphql-tag";
+import { useQuery } from "@vue/apollo-composable";
 
 export default {
   setup() {
-    const BASE_URL = import.meta.env.VITE_BASE_URL;
+    const membersQuery = gql`
+      query {
+        members {
+          id
+          firstName: first_name
+          lastName: last_name
+          birthdate
+          reportSubject: report_subject
+          country
+          phone
+          email
+          company
+          position
+          aboutMe: about_me
+          photo
+          isVisible: is_visible
+          createdAt: created_at
+          updatedAt: updated_at
+        }
+      }
+    `;
 
-    const { responseData } = useAxiosFetch(`${BASE_URL}/api/v1/members`);
+    const { result: responseData } = useQuery(membersQuery);
 
     return {
       shareData,

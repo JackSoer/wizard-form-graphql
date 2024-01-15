@@ -1,6 +1,14 @@
 "A datetime string with format `Y-m-d H:i:s`, e.g. `2018-05-23 13:43:32`."
 scalar DateTime
   @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+scalar Upload
+  @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Upload")
+
+type File {
+  filename: String!
+  mimetype: String!
+  encoding: String!
+}
 
 type Query {
   countries: [Country] @all
@@ -9,8 +17,8 @@ type Query {
   member(id: ID! @eq): Member @find
 }
 
-type Mutation {
-  
+extend type Mutation {
+  createMember(input: MemberInput): Member!
 }
 
 type User {
@@ -44,4 +52,19 @@ type Member {
   is_visible: Boolean
   created_at: String
   updated_at: String
+}
+
+input MemberInput {
+  firstName: String!
+  lastName: String!
+  birthdate: String!
+  reportSubject: String!
+  country: String!
+  phone: String!
+  email: String!
+  company: String
+  position: String
+  aboutMe: String
+  photo: Upload
+  isVisible: Boolean
 }

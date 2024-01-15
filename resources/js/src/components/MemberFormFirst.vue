@@ -31,7 +31,7 @@
       @blur="validator.reportSubject.$touch"
     />
     <MySelect
-      :items="countriesOptions"
+      :items="countries"
       name="country"
       id="country"
       required="true"
@@ -69,9 +69,10 @@
 import PhoneInput from "@/components/PhoneInput.vue";
 import BirthdateInput from "@/components/BirthdateInput.vue";
 import inputData from "@/data/inputData";
-import useAxiosFetch from "@/hooks/useAxiosFetch";
 import { mapState, mapMutations } from "vuex";
-import { computed } from "vue";
+import gql from "graphql-tag";
+import { useQuery } from "@vue/apollo-composable";
+import { ref, watch } from "vue";
 
 export default {
   components: { BirthdateInput, PhoneInput },
@@ -79,12 +80,19 @@ export default {
     const inputDataFirst = inputData.firstPart.slice(0, 2);
     const inputDataSecond = inputData.firstPart.slice(3);
 
-    const { responseData: countries } = useAxiosFetch(
-      "http://127.0.0.1:8000/api/v1/country"
-    );
+    const countries = ref([]);
 
-    const countriesOptions = computed(() => {
-      return countries.value?.data?.map((country) => ({
+    const { result } = useQuery(gql`
+      query {
+        countries {
+          code
+          name
+        }
+      }
+    `);
+
+    watch(result, (newResult) => {
+      countries.value = newResult.countries.map((country) => ({
         ...country,
         value: country.name,
       }));
@@ -93,7 +101,7 @@ export default {
     return {
       inputDataFirst,
       inputDataSecond,
-      countriesOptions,
+      countries,
     };
   },
   methods: {

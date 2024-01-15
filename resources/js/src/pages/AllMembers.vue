@@ -3,19 +3,16 @@
     <div class="container">
       <members-table
         v-if="!errors && !isLoading"
-        :members="members?.data"
+        :members="members?.members"
       ></members-table>
-      <loading v-if="!errors && isLoading"></loading>
-      <div class="errors" v-if="!isLoading && errors">
-        <p class="error" v-for="error in errors">{{ error }}</p>
-      </div>
     </div>
   </div>
 </template>
 <script>
-import useAxiosFetch from "@/hooks/useAxiosFetch";
 import MembersTable from "@/components/MembersTable.vue";
 import Loading from "@/components/Loading.vue";
+import gql from "graphql-tag";
+import { useQuery } from "@vue/apollo-composable";
 
 export default {
   components: {
@@ -23,16 +20,32 @@ export default {
     Loading,
   },
   setup() {
-    const BASE_URL = import.meta.env.VITE_BASE_URL;
+    const membersQuery = gql`
+      query {
+        members {
+          id
+          firstName: first_name
+          lastName: last_name
+          birthdate
+          reportSubject: report_subject
+          country
+          phone
+          email
+          company
+          position
+          aboutMe: about_me
+          photo
+          isVisible: is_visible
+          createdAt: created_at
+          updatedAt: updated_at
+        }
+      }
+    `;
 
-    const { responseData, isLoading, errors } = useAxiosFetch(
-      `${BASE_URL}/api/v1/members`
-    );
+    const { result: responseData } = useQuery(membersQuery);
 
     return {
       members: responseData,
-      isLoading,
-      errors,
     };
   },
 };

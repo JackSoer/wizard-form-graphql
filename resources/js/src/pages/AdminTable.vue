@@ -17,7 +17,7 @@ import Loading from "@/components/Loading.vue";
 import { mapState, useStore } from "vuex";
 import { computed } from "vue";
 import gql from "graphql-tag";
-import { useQuery } from "@vue/apollo-composable";
+import { useMutation, useQuery } from "@vue/apollo-composable";
 
 export default {
   components: {
@@ -55,15 +55,18 @@ export default {
 
     const { result: responseData, refetch } = useQuery(membersQuery);
 
-    const { axiosRequest, errors: deleteErrors } = useAxiosRequest("delete", {
-      Authorization: `Bearer ${user.value?.token}`,
-    });
+    const DELETE_MEMBER_MUTATION = gql`
+      mutation DeleteMember($id: ID!) {
+        deleteMember(id: $id)
+      }
+    `;
+
+    const { mutate: deleteMemberMutation } = useMutation(
+      DELETE_MEMBER_MUTATION
+    );
 
     const remove = async (id) => {
-      await axiosRequest(`${BASE_URL}/api/v1/members/${id}`);
-      if (deleteErrors.value) {
-        return;
-      }
+      await deleteMemberMutation({ id });
 
       await refetch();
 
@@ -72,18 +75,38 @@ export default {
       );
     };
 
-    const { axiosRequest: postRequest, errors: editErrors } =
-      useAxiosRequest("post");
+    const EDIT_MEMBER_MUTATION = gql`
+      mutation EditMember($id: ID!, $input: MemberInput, $photo: Upload) {
+        editMember(id: $id, input: $input, photo: $photo) {
+          id
+        }
+      }
+    `;
+
+    const { mutate: editMemberMutation } = useMutation(EDIT_MEMBER_MUTATION, {
+      context: {
+        hasUpload: true,
+      },
+    });
 
     const editVisibility = async (member) => {
-      await postRequest(`${BASE_URL}/api/v1/members/${member.id}`, {
-        isVisible: !member.isVisible,
-        _method: "PATCH",
-      });
+      const {
+        photo,
+        createdAt,
+        updatedAt,
+        id,
+        __typename,
+        ...memberWithoutPhoto
+      } = member;
 
-      if (editErrors.value) {
-        return;
-      }
+      const { data } = await editMemberMutation({
+        id,
+        input: {
+          ...memberWithoutPhoto,
+          isVisible: Boolean(!member.isVisible),
+        },
+      });
+      console.log(data);
 
       await refetch();
 

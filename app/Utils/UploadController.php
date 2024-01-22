@@ -8,15 +8,14 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 class UploadController extends Controller
 {
-    public static function uploadFile(string $fileFieldFromRequest)
+    public static function uploadFile($file)
     {
         $filePath = null;
-        $file = request()->file($fileFieldFromRequest);
 
         if ($file) {
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('uploads', $fileName, 'public');
+            $filePath = $file->storePublicly('public');
             $filePath = '/storage/' . $filePath;
+            $filePath = str_replace('/public', '', $filePath);
         }
 
         return $filePath;

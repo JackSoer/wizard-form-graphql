@@ -5,10 +5,11 @@ namespace App\GraphQL\Mutations;
 use App\Models\Member;
 use App\Utils\UploadController;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Nuwave\Lighthouse\Exceptions\ValidationException;
+use Illuminate\Support\Str;
 
-final readonly class CreateMember
+final readonly class EditMember
 {
     /** @param  array{}  $args */
     public function __invoke(null $_, array $args)
@@ -22,7 +23,7 @@ final readonly class CreateMember
             'report_subject' => ['required', 'between:1,100', 'string'],
             'country' => ['required', 'string', 'between:2,100'],
             'phone' => ['required', 'string', 'between:10,100'],
-            'email' => ['required', 'email:rfc,dns', 'unique:members'],
+            'email' => ['required', 'email:rfc,dns', Rule::unique('members')->ignore($args['id'])],
             'company' => ['nullable', 'string', 'max:40'],
             'position' => ['nullable', 'string', 'max:40'],
             'about_me' => ['nullable', 'string', 'max:2000'],
@@ -36,12 +37,23 @@ final readonly class CreateMember
             throw new ValidationException($errorMessage, $validator);
         }
 
-        if(isset($args['input']['photo'])) {
-            $filePath = UploadController::uploadFile($args['input']['photo']);
-            $args['input']['photo'] = $filePath;
+        $member = Member::findOrFail($args['id']);
+
+        if (isset($args['photo'])) {
+            $photo = $args['photo'];
+            unset($args['photo']);
+
+            $filePath = null;
+            if ($photo !== null) {
+                $filePath = UploadController::uploadFile($photo);
+            }
+
+            $member->photo = $filePath;
         }
 
-        return Member::create($args['input']);
+        $member->update($args['input']);
+
+        return $member;
     }
 
     private function transformToSnakeCase(array $input): array

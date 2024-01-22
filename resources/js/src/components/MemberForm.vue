@@ -16,6 +16,7 @@
         :validator="v$"
         @validatePhone="validatePhone"
         :nextClickCount="nextClickCount"
+        :requestErrors="requestErrors"
       />
       <MemberFormSecond
         v-if="currentStep === 2 || onlyEdit"
@@ -48,7 +49,7 @@ import useMultiform from "@/hooks/useMultiform";
 import { mapState, mapMutations, useStore } from "vuex";
 import useVuelidate from "@vuelidate/core";
 import { required, maxLength, minLength, email } from "@vuelidate/validators";
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, reactive } from "vue";
 import { useRouter } from "vue-router";
 import gql from "graphql-tag";
 import { useMutation } from "@vue/apollo-composable";
@@ -78,6 +79,7 @@ export default {
       useMultiform(2);
 
     const router = useRouter();
+    const requestErrors = reactive({ email: "" });
 
     let rules = {
       firstName: {
@@ -149,6 +151,20 @@ export default {
       CREATE_MEMBER_MUTATION
     );
 
+    const EDIT_MEMBER_MUTATION = gql`
+      mutation EditMember($id: ID!, $input: MemberInput, $photo: Upload) {
+        editMember(id: $id, input: $input, photo: $photo) {
+          id
+        }
+      }
+    `;
+
+    const { mutate: editMemberMutation } = useMutation(EDIT_MEMBER_MUTATION, {
+      context: {
+        hasUpload: true,
+      },
+    });
+
     const submitMember = async () => {
       let member = store.state.member.member;
 
@@ -169,61 +185,71 @@ export default {
 
       nextClickCount.value += 1;
 
-      if (isValid && phoneIsValid.value && photoErrors.value.length <= 0) {
-        const userId = localStorage.getItem("userId") || null;
+      requestErrors.email = "";
 
-        const formData = new FormData();
-
-        for (const key in member) {
-          if (key === "photo" && !member[key] && !onlyEdit) {
-            continue;
-          }
-
-          if (!member[key]) {
-            formData.append(key, "");
-          } else {
-            formData.append(key, member[key]);
-          }
-        }
+      if (
+        (isValid && phoneIsValid.value && photoErrors.value.length <= 0) ||
+        currentStep.value === 2
+      ) {
         const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-        if (userId || onlyEdit) {
-          formData.append("_method", "PUT");
-          const id = onlyEdit ? editId : userId;
+        const userId = localStorage.getItem("userId") || null;
 
+        const id = onlyEdit ? editId : userId;
+
+        const { photo, ...memberWithoutPhoto } = member;
+
+        if (userId || onlyEdit) {
+          console.log(member.photo);
           try {
-            await axios.post(`${BASE_URL}/api/v1/members/${id}`, formData);
+            const { data } = await editMemberMutation({
+              id,
+              input: {
+                ...memberWithoutPhoto,
+                isVisible: Boolean(member.isVisible),
+              },
+              photo: member.photo,
+            });
+            console.log(data);
           } catch (err) {
             console.log(err);
           }
         } else {
           try {
             const { data } = await createMemberMutation({
-              input: { ...member, isVisible: Boolean(member.isVisible) },
+              input: {
+                ...memberWithoutPhoto,
+                isVisible: Boolean(member.isVisible),
+              },
             });
+            console.log(data);
 
-            localStorage.setItem("userId", data.id);
+            localStorage.setItem("userId", data.createMember.id);
           } catch (err) {
             console.log(err);
+
+            requestErrors.email = ["Email already taken"];
           }
         }
 
-        if (!isLastStep() && !onlyEdit) {
-          localStorage.setItem("member", JSON.stringify(member));
+        if (!requestErrors.email) {
+          if (!isLastStep() && !onlyEdit) {
+            localStorage.setItem("member", JSON.stringify(member));
 
-          next();
+            next();
 
-          localStorage.setItem("currentStep", currentStep.value);
-        } else if (!onlyEdit) {
-          localStorage.removeItem("currentStep");
-          localStorage.removeItem("member");
-          localStorage.removeItem("userId");
+            localStorage.setItem("currentStep", currentStep.value);
+          } else if (!onlyEdit) {
+            localStorage.removeItem("currentStep");
+            localStorage.removeItem("member");
+            localStorage.removeItem("userId");
 
-          store.commit("member/clearMember");
+            store.commit("member/clearMember");
 
-          router.push("/share");
-        } else {
-          router.push("/admin-table");
+            router.push("/share");
+          } else {
+            router.push("/admin-table");
+          }
         }
       }
     };
@@ -241,6 +267,7 @@ export default {
       nextClickCount,
       member,
       submitMember,
+      requestErrors,
     };
   },
   methods: {

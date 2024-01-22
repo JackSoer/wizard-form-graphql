@@ -72,15 +72,13 @@ import inputData from "@/data/inputData";
 import { mapState, mapMutations } from "vuex";
 import gql from "graphql-tag";
 import { useQuery } from "@vue/apollo-composable";
-import { ref, watch } from "vue";
+import { computed } from "vue";
 
 export default {
   components: { BirthdateInput, PhoneInput },
   setup() {
     const inputDataFirst = inputData.firstPart.slice(0, 2);
     const inputDataSecond = inputData.firstPart.slice(3);
-
-    const countries = ref([]);
 
     const { result } = useQuery(gql`
       query {
@@ -91,12 +89,12 @@ export default {
       }
     `);
 
-    watch(result, (newResult) => {
-      countries.value = newResult.countries.map((country) => ({
+    const countries = computed(() =>
+      result?.value?.countries?.map((country) => ({
         ...country,
         value: country.name,
-      }));
-    });
+      }))
+    );
 
     return {
       inputDataFirst,

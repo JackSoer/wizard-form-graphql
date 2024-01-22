@@ -26,6 +26,7 @@
 import shareData from "@/data/shareData";
 import gql from "graphql-tag";
 import { useQuery } from "@vue/apollo-composable";
+import { onMounted } from "vue";
 
 export default {
   setup() {
@@ -51,7 +52,11 @@ export default {
       }
     `;
 
-    const { result: responseData } = useQuery(membersQuery);
+    const { result: responseData, refetch } = useQuery(membersQuery);
+
+    onMounted(() => {
+      refetch();
+    });
 
     return {
       shareData,

@@ -19,6 +19,8 @@ type Query {
 
 extend type Mutation {
   createMember(input: MemberInput): Member!
+  editMember(id: ID!, input: MemberInput, photo: Upload): Member!
+  deleteMember(id: ID!): Boolean!
 }
 
 type User {
@@ -65,6 +67,5 @@ input MemberInput {
   company: String
   position: String
   aboutMe: String
-  photo: Upload
   isVisible: Boolean
 }

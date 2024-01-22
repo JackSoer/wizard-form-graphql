@@ -5,14 +5,11 @@ import router from "@/router/router";
 import components from "@/components/UI";
 import store from "@/store";
 import VueSocialSharing from "vue-social-sharing";
-import {
-  ApolloClient,
-  createHttpLink,
-  InMemoryCache,
-} from "@apollo/client/core";
+import { ApolloClient, InMemoryCache } from "@apollo/client/core";
 import { DefaultApolloClient } from "@vue/apollo-composable";
+import createUploadLink from "apollo-upload-client/createUploadLink.mjs";
 
-const httpLink = createHttpLink({
+const httpLink = createUploadLink({
   uri: `http://127.0.0.1:8000/graphql`,
 });
 
